@@ -6,8 +6,8 @@ from django.contrib.auth.models import Group, User
 from vendors.models import Invoice,LarinUser,LarinCustomer,LarinVendor
 
 class MyAdminSite(admin.AdminSite):
-    site_title = _('Larin - Invoice Management Admin')
-    site_header = _('Larin.cash')
+    site_title = _('larin.cash')
+    site_header = _('Larin')
     index_title = _('Invoice Management Admin')
 
 
@@ -24,9 +24,9 @@ class VendorAdmin(admin.ModelAdmin):
     search_fields = ('name','wallet_id','created','company_name','company_code','cell_phone')
 
 class CustmerAdmin(admin.ModelAdmin):
-    list_display = ('name','wallet_id','created')
-    list_filter = ('name','wallet_id','created')
-    search_fields = ('name','wallet_id','created')
+    list_display = ('details','name','wallet_id','created')
+    list_filter = ('wallet_id','created')
+    search_fields = ('name','wallet_id','details')
 
 site.register(LarinCustomer,CustmerAdmin)
 site.register(LarinVendor,VendorAdmin)

@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
-from utils import generate_new_code
-import validators
+from vendors.validators import phone_validator,wallet_validator,national_code_validator,ll_phone_validator
+from vendors.utils import generate_new_code
 
 
 def gen_invoice_id():
-    return generate_new_code(Invoice, 'identifier')
+    return generate_new_code(Invoice, 'invoice_code')
 
 
 class DateTimeAwareModel(models.Model):
@@ -41,24 +41,30 @@ class LarinUser(DateTimeAwareModel):
     wallet_id = models.CharField(
         verbose_name=_('wallet id'),
         help_text=_('ethereum network valid id'),
-        validators=[validators.wallet_validator, ],
+        validators=[wallet_validator, ],
         max_length=100
     )
 
     def __str__(self):
         return '{title}'.format(title=self.wallet_id)
 
-    class Meta:
-        abstract = True
 
 
 class LarinCustomer(LarinUser):
+    details = models.TextField(
+        verbose_name=_('Details'),
+        help_text=_('informations'),
+        default='-',
+        blank=True,
+
+    )
+
     def __str__(self):
         return '{title}'.format(title=self.name)
 
     class Meta:
-        verbose_name = _('Larin User')
-        verbose_name_plural = _('Larin Users')
+        verbose_name = _('Larin Customer')
+        verbose_name_plural = _('Larin Customers')
 
 
 class LarinVendor(LarinUser):
@@ -83,7 +89,7 @@ class LarinVendor(LarinUser):
         verbose_name=_('national code'),
         help_text=_('national code of the transferee'),
         max_length=10,
-        validators=[validators.national_code_validator]
+        validators=[national_code_validator]
 
     )
     company_mail = models.EmailField(
@@ -95,7 +101,7 @@ class LarinVendor(LarinUser):
         verbose_name=_('cell phone'),
         help_text=_('cell phone number of the transferee'),
         max_length=20,
-        validators=[validators.phone_validator]
+        validators=[phone_validator]
     )
 
     def __str__(self):
@@ -130,7 +136,7 @@ class Invoice(DateTimeAwareModel):
         verbose_name=_('Vendor'),
         help_text=_('Vendor who created this invoice'),
         to=LarinVendor,
-        related_name='invoices',
+        related_name='vendor_invoices',
         on_delete=models.CASCADE
 
     )
@@ -147,7 +153,7 @@ class Invoice(DateTimeAwareModel):
         verbose_name=_('Customer'),
         help_text=_('Customer who needs to pay the bill'),
         to=LarinCustomer,
-        related_name='invoices',
+        related_name='customer_invoices',
         on_delete=models.CASCADE
 
     )
@@ -161,7 +167,7 @@ class Invoice(DateTimeAwareModel):
         verbose_name=_('phone'),
         help_text=_('phone number of the transferee'),
         max_length=20,
-        validators=[validators.ll_phone_validator]
+        validators=[ll_phone_validator]
     )
 
     def __str__(self):
