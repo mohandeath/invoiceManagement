@@ -4,8 +4,10 @@ from django.db import models
 from utils import generate_new_code
 import validators
 
+
 def gen_invoice_id():
-    return generate_new_code(Invoice,'identifier')
+    return generate_new_code(Invoice, 'identifier')
+
 
 class DateTimeAwareModel(models.Model):
     created = models.DateTimeField(
@@ -28,6 +30,7 @@ class DateTimeAwareModel(models.Model):
     class Meta:
         abstract = True
 
+
 class LarinUser(DateTimeAwareModel):
     name = models.CharField(
         verbose_name=_('Larin User'),
@@ -38,10 +41,18 @@ class LarinUser(DateTimeAwareModel):
     wallet_id = models.CharField(
         verbose_name=_('wallet id'),
         help_text=_('ethereum network valid id'),
-        validators=[validators.wallet_validator,],
+        validators=[validators.wallet_validator, ],
         max_length=100
     )
 
+    def __str__(self):
+        return '{title}'.format(title=self.wallet_id)
+
+    class Meta:
+        abstract = True
+
+
+class LarinCustomer(LarinUser):
     def __str__(self):
         return '{title}'.format(title=self.name)
 
@@ -50,7 +61,51 @@ class LarinUser(DateTimeAwareModel):
         verbose_name_plural = _('Larin Users')
 
 
-# Create your models here.
+class LarinVendor(LarinUser):
+    full_name = models.CharField(
+        verbose_name=_('first name'),
+        help_text=_('first name of the transferee'),
+        max_length=255
+    )
+
+    company_name = models.CharField(
+        verbose_name=_("Company Name"),
+        help_text=_("Fill the title of your Company"),
+        max_length=255
+    )
+    company_code = models.CharField(
+        verbose_name=_("Company Code"),
+        help_text=_("Enter the economic code of your Company"),
+        max_length=255
+    )
+
+    national_code = models.CharField(
+        verbose_name=_('national code'),
+        help_text=_('national code of the transferee'),
+        max_length=10,
+        validators=[validators.national_code_validator]
+
+    )
+    company_mail = models.EmailField(
+        verbose_name=_("Company Mail"),
+        help_text=_("enter your Comapany Mail")
+    )
+
+    cell_phone = models.CharField(
+        verbose_name=_('cell phone'),
+        help_text=_('cell phone number of the transferee'),
+        max_length=20,
+        validators=[validators.phone_validator]
+    )
+
+    def __str__(self):
+        return '{title}'.format(title=self.company_name)
+
+    class Meta:
+        verbose_name = _('Larin Vendor')
+        verbose_name_plural = _('Larin Vendor')
+
+
 class Invoice(DateTimeAwareModel):
     title = models.CharField(
         verbose_name=_('title'),
@@ -74,7 +129,7 @@ class Invoice(DateTimeAwareModel):
     vendor = models.ForeignKey(
         verbose_name=_('Vendor'),
         help_text=_('Vendor who created this invoice'),
-        to=LarinUser,
+        to=LarinVendor,
         related_name='invoices',
         on_delete=models.CASCADE
 
@@ -88,11 +143,10 @@ class Invoice(DateTimeAwareModel):
 
     )
 
-
-    customer = models.ForeignKey(
+    to = models.ForeignKey(
         verbose_name=_('Customer'),
         help_text=_('Customer who needs to pay the bill'),
-        to=LarinUser,
+        to=LarinCustomer,
         related_name='invoices',
         on_delete=models.CASCADE
 
