@@ -60,7 +60,7 @@ class LarinCustomer(LarinUser):
     )
 
     def __str__(self):
-        return '{title}'.format(title=self.name)
+        return '{title}'.format(title=self.wallet_id)
 
     class Meta:
         verbose_name = _('Larin Customer')
@@ -105,7 +105,7 @@ class LarinVendor(LarinUser):
     )
 
     def __str__(self):
-        return '{title}'.format(title=self.company_name)
+        return '{title}'.format(title=self.wallet_id)
 
     class Meta:
         verbose_name = _('Larin Vendor')
@@ -146,6 +146,8 @@ class Invoice(DateTimeAwareModel):
         to=LarinUser,
         related_name='invoices',
         on_delete=models.CASCADE,
+        blank=True,
+        null=True
 
     )
 
