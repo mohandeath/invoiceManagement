@@ -8,6 +8,7 @@ from vendors.models import LarinCustomer,LarinVendor,Invoice
 # Create your views here.
 import django_filters
 class InvoiceSerializer(serializers.ModelSerializer):
+    #TODO : add filter for owner and two by wallet id
     owner_wallet = serializers.CharField(source="owner.wallet_id")
     customer_wallet = serializers.CharField(source="to.wallet_id")
     vendor_wallet = serializers.CharField(source="vendor.wallet_id")
